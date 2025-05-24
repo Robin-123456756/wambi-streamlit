@@ -46,20 +46,18 @@ st.write("You will soon be able to talk to Wambi using your voice.")
 st.markdown("---")
 st.caption(f"🕒 {datetime.now().strftime('%A, %B %d, %Y - %H:%M:%S')}")
 st.caption("Powered by Streamlit | Wambi AI (Preview)")
+
 import streamlit as st
 import cv2
-import face_recognition
 from gtts import gTTS
-import os
 
-st.title("🔍 Wambi Face Recognition + Vital Scan")
+st.title("🔍 Wambi Face Detection + Vital Scan")
 
 run = st.button("Scan My Face")
 
 if run:
     st.write("📷 Scanning webcam... Please hold still.")
-    
-    # Start webcam
+
     cap = cv2.VideoCapture(0)
     ret, frame = cap.read()
     cap.release()
@@ -67,19 +65,19 @@ if run:
     if not ret:
         st.error("Camera not accessible.")
     else:
-        # Detect face
-        face_locations = face_recognition.face_locations(frame)
-        if face_locations:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
+        if len(faces) > 0:
             st.success("Face detected ✅")
             message = "Hard Guy, your identity has been confirmed. Let’s check your vitals."
         else:
             st.error("No face detected ❌")
             message = "No face detected, please try again."
 
-        # Save voice
         tts = gTTS(message)
         tts.save("wambi_voice.mp3")
         st.audio("wambi_voice.mp3", format="audio/mp3")
 
-        # Show image preview
         st.image(frame, channels="BGR", caption="Webcam Snapshot")
