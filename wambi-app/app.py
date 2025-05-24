@@ -1,5 +1,6 @@
 import streamlit as st
 from gtts import gTTS
+st.set_page_config(page_title="Wambi", layout="centered")
 
 st.title("🎙️ Wambi Voice Test")
 
@@ -15,8 +16,6 @@ st.audio("wambi_test.mp3", format="audio/mp3")
 
 import streamlit as st
 from datetime import datetime
-
-st.set_page_config(page_title="Wambi", layout="centered")
 
 # User Name
 user_name = "Hard Guy"  # You can make this dynamic later
