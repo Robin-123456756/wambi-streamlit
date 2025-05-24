@@ -4,7 +4,7 @@ from gtts import gTTS
 st.title("🎙️ Wambi Voice Test")
 
 # Voice message
-message = "Hard Guy, Wambi is ready to serve you."
+message = "Robin, Wambi is ready to serve you."
 
 # Generate speech
 tts = gTTS(text=message, lang='en')
@@ -12,8 +12,6 @@ tts.save("wambi_test.mp3")
 
 # Play voice message
 st.audio("wambi_test.mp3", format="audio/mp3")
-
-Add voice output using gTTS
 
 import streamlit as st
 from datetime import datetime
