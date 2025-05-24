@@ -4,6 +4,9 @@ gTTS
 streamlit
 opencv-python
 gTTS
+streamlit
+opencv-python
+gTTS
 
 
 
