@@ -4,6 +4,11 @@ gTTS
 streamlit
 opencv-python-headless
 gTTS
+speechrecognition
+pydub
+gtts
+streamlit
+opencv-python-headless
 
 
 
