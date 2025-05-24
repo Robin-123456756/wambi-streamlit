@@ -51,49 +51,51 @@ import streamlit as st
 st.title("Hello from Wambi!")
 
 import streamlit as st
-import cv2
 from gtts import gTTS
 import os
+import random
 
-st.set_page_config(page_title="Wambi Scan", page_icon="🤖")
-st.title("🤖 Wambi Face Detection & Vital Prep")
+st.set_page_config(page_title="Wambi AI", page_icon="🌞")
+st.title("🌞 Good Morning, Hard Guy")
 
-start = st.button("Scan My Face")
+if st.button("Start My Day"):
+    st.success("✅ Wambi Activated")
 
-if start:
-    st.write("📷 Scanning webcam... Please hold still.")
+    # Alarm greeting
+    phrase = "Wambi, remember the words of your Father."
+    tts = gTTS(phrase)
+    tts.save("alarm.mp3")
+    st.audio("alarm.mp3", format="audio/mp3")
 
-    # Open webcam using headless-friendly method
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        st.error("❌ Camera not accessible.")
-    else:
-        ret, frame = cap.read()
-        cap.release()
+    st.subheader("🩺 Vital Sign Check (Simulated)")
+    heart_rate = random.randint(65, 85)
+    oxygen = random.randint(96, 99)
+    stress_level = random.choice(["Low", "Normal", "Elevated"])
 
-        if not ret:
-            st.error("❌ Failed to capture image.")
-        else:
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            face_cascade = cv2.CascadeClassifier(
-                cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-            )
-            faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+    st.write(f"Heart Rate: **{heart_rate} bpm**")
+    st.write(f"Oxygen Level: **{oxygen}%**")
+    st.write(f"Stress Level: **{stress_level}**")
 
-            if len(faces) > 0:
-                st.success("✅ Face detected")
-                message = "Hard Guy, your identity has been confirmed. Let’s check your vitals."
-            else:
-                st.error("❌ No face detected")
-                message = "No face detected. Please try again."
+    st.subheader("☕ Coffee Sugar Recommendation")
+    sugar = round(0.03 * heart_rate, 1)
+    st.write(f"Recommended sugar for your coffee: **{sugar} grams**")
 
-            # Generate and play audio
-            tts = gTTS(message)
-            tts.save("wambi_voice.mp3")
-            st.audio("wambi_voice.mp3", format="audio/mp3")
+    st.subheader("🏋️‍♂️ Exercise Tip")
+    tip = random.choice([
+        "20-minute morning walk",
+        "15-minute yoga stretch",
+        "10 push-ups, 20 squats",
+        "High-Intensity 5-minute HIIT"
+    ])
+    st.write(f"Today’s suggestion: **{tip}**")
 
-            st.image(frame, channels="BGR", caption="📸 Webcam Snapshot")
+    # Personalized message
+    farewell = f"All set, Hard Guy. Crush the day."
+    tts = gTTS(farewell)
+    tts.save("farewell.mp3")
+    st.audio("farewell.mp3", format="audio/mp3")
 
-
+    
+           
 
 
