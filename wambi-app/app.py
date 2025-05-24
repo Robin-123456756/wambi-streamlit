@@ -46,7 +46,11 @@ st.write("You will soon be able to talk to Wambi using your voice.")
 st.markdown("---")
 st.caption(f"🕒 {datetime.now().strftime('%A, %B %d, %Y - %H:%M:%S')}")
 st.caption("Powered by Streamlit | Wambi AI (Preview)")
+import streamlit as st
 
+st.title("Hello from Wambi!")
+
+st.write("If you see this, Streamlit is running.")
 import streamlit as st
 import cv2
 from gtts import gTTS
@@ -81,3 +85,5 @@ if run:
         st.audio("wambi_voice.mp3", format="audio/mp3")
 
         st.image(frame, channels="BGR", caption="Webcam Snapshot")
+
+
