@@ -1,6 +1,10 @@
 streamlit
 streamlit
 gTTS
+streamlit
+opencv-python
+face_recognition
+gTTS
 
 
 
