@@ -1,7 +1,7 @@
-import streamlit as st
-
 # ✅ THIS MUST BE ABSOLUTELY FIRST
 st.set_page_config(page_title="Wambi AI", page_icon="🌞")
+
+import streamlit as st
 
 from gtts import gTTS
 import os
