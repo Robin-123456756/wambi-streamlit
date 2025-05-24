@@ -1,3 +1,17 @@
+import streamlit as st
+from gtts import gTTS
+
+st.title("🎙️ Wambi Voice Test")
+
+# The message Wambi will say
+message = "If you can hear this, Wambi speaks!"
+
+# Generate the voice message using Google Text-to-Speech
+tts = gTTS(text=message, lang='en')
+tts.save("wambi_test.mp3")
+
+# Display and play the voice message
+st.audio("wambi_test.mp3", format="audio/mp3")
 
 import streamlit as st
 from datetime import datetime
