@@ -13,6 +13,8 @@ tts.save("wambi_test.mp3")
 # Play voice message
 st.audio("wambi_test.mp3", format="audio/mp3")
 
+Add voice output using gTTS
+
 import streamlit as st
 from datetime import datetime
 
