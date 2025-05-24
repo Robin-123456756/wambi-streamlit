@@ -3,27 +3,13 @@ from gtts import gTTS
 import os
 import random
 import speech_recognition as sr
+from pydub import AudioSegment
+import tempfile
 
 # 🔧 THIS MUST BE FIRST
 st.set_page_config(page_title="Wambi AI", page_icon="🌞")
 
 st.title("🌞 Good Morning, Hard Guy")
-
-# Function for voice input
-def listen_to_user():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("🎤 Listening... Say something.")
-        audio = recognizer.listen(source)
-
-        try:
-            text = recognizer.recognize_google(audio)
-            st.success(f"🗣️ You said: {text}")
-            return text
-        except sr.UnknownValueError:
-            st.error("❌ Wambi couldn’t understand you.")
-        except sr.RequestError:
-            st.error("⚠️ Could not reach Google Speech API.")
 
 if st.button("Start My Day"):
     st.success("✅ Wambi Activated")
@@ -62,16 +48,27 @@ if st.button("Start My Day"):
     tts.save("farewell.mp3")
     st.audio("farewell.mp3", format="audio/mp3")
 
-# Voice interaction button
-if st.button("🎙️ Talk to Wambi"):
-    command = listen_to_user()
-    if command:
-        if "coffee" in command.lower():
-            st.write("☕ I’ll get your coffee preferences ready.")
-        elif "exercise" in command.lower():
-            st.write("💪 Time for some fitness.")
-        else:
-            st.write("🤖 I heard you, but I’m still learning that command.")
+# ---------------------------
+st.markdown("---")
+st.subheader("🎙️ Upload Voice Command")
+uploaded_file = st.file_uploader("Upload a .wav audio file", type=["wav"])
+if uploaded_file is not None:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = tmp.name
+
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(tmp_path) as source:
+        audio = recognizer.record(source)
+
+    try:
+        text = recognizer.recognize_google(audio)
+        st.success(f"You said: {text}")
+    except sr.UnknownValueError:
+        st.warning("Sorry, I could not understand the audio.")
+    except sr.RequestError:
+        st.error("Speech recognition service is unavailable.")
+
 
 
 # ✅ THIS MUST BE ABSOLUTELY FIRST
