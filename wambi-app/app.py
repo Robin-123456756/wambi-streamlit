@@ -69,11 +69,6 @@ if uploaded_file is not None:
     except sr.RequestError:
         st.error("Speech recognition service is unavailable.")
 
-
-
-# ✅ THIS MUST BE ABSOLUTELY FIRST
-st.set_page_config(page_title="Wambi AI", page_icon="🌞")
-
 from gtts import gTTS
 import os
 import random
