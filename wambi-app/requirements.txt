@@ -2,10 +2,7 @@ streamlit
 streamlit
 gTTS
 streamlit
-opencv-python
-gTTS
-streamlit
-opencv-python
+opencv-python-headless
 gTTS
 
 
