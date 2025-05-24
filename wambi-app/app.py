@@ -48,14 +48,14 @@ st.caption(f"🕒 {datetime.now().strftime('%A, %B %d, %Y - %H:%M:%S')}")
 st.caption("Powered by Streamlit | Wambi AI (Preview)")
 import streamlit as st
 
-st.title("Hello from Wambi!")
-
 import streamlit as st
 from gtts import gTTS
 import os
 import random
 
+# 🔧 THIS MUST BE FIRST
 st.set_page_config(page_title="Wambi AI", page_icon="🌞")
+
 st.title("🌞 Good Morning, Hard Guy")
 
 if st.button("Start My Day"):
@@ -95,7 +95,6 @@ if st.button("Start My Day"):
     tts.save("farewell.mp3")
     st.audio("farewell.mp3", format="audio/mp3")
 
-    
-           
 
+    
 
