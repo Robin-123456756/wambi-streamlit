@@ -1,17 +1,16 @@
 import streamlit as st
 from gtts import gTTS
-st.set_page_config(page_title="Wambi", layout="centered")
 
 st.title("🎙️ Wambi Voice Test")
 
-# The message Wambi will say
-message = "If you can hear this, Wambi speaks!"
+# Voice message
+message = "Hard Guy, Wambi is ready to serve you."
 
-# Generate the voice message using Google Text-to-Speech
+# Generate speech
 tts = gTTS(text=message, lang='en')
 tts.save("wambi_test.mp3")
 
-# Display and play the voice message
+# Play voice message
 st.audio("wambi_test.mp3", format="audio/mp3")
 
 import streamlit as st
