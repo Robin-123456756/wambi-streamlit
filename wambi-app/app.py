@@ -50,40 +50,50 @@ import streamlit as st
 
 st.title("Hello from Wambi!")
 
-st.write("If you see this, Streamlit is running.")
 import streamlit as st
 import cv2
 from gtts import gTTS
+import os
 
-st.title("🔍 Wambi Face Detection + Vital Scan")
+st.set_page_config(page_title="Wambi Scan", page_icon="🤖")
+st.title("🤖 Wambi Face Detection & Vital Prep")
 
-run = st.button("Scan My Face")
+start = st.button("Scan My Face")
 
-if run:
+if start:
     st.write("📷 Scanning webcam... Please hold still.")
 
+    # Open webcam using headless-friendly method
     cap = cv2.VideoCapture(0)
-    ret, frame = cap.read()
-    cap.release()
-
-    if not ret:
-        st.error("Camera not accessible.")
+    if not cap.isOpened():
+        st.error("❌ Camera not accessible.")
     else:
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+        ret, frame = cap.read()
+        cap.release()
 
-        if len(faces) > 0:
-            st.success("Face detected ✅")
-            message = "Hard Guy, your identity has been confirmed. Let’s check your vitals."
+        if not ret:
+            st.error("❌ Failed to capture image.")
         else:
-            st.error("No face detected ❌")
-            message = "No face detected, please try again."
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            face_cascade = cv2.CascadeClassifier(
+                cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+            )
+            faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
-        tts = gTTS(message)
-        tts.save("wambi_voice.mp3")
-        st.audio("wambi_voice.mp3", format="audio/mp3")
+            if len(faces) > 0:
+                st.success("✅ Face detected")
+                message = "Hard Guy, your identity has been confirmed. Let’s check your vitals."
+            else:
+                st.error("❌ No face detected")
+                message = "No face detected. Please try again."
 
-        st.image(frame, channels="BGR", caption="Webcam Snapshot")
+            # Generate and play audio
+            tts = gTTS(message)
+            tts.save("wambi_voice.mp3")
+            st.audio("wambi_voice.mp3", format="audio/mp3")
+
+            st.image(frame, channels="BGR", caption="📸 Webcam Snapshot")
+
+
 
 
