@@ -9,6 +9,7 @@ pydub
 gtts
 streamlit
 opencv-python-headless
+streamlit-webrtc
 
 
 
