@@ -10,6 +10,7 @@ gtts
 streamlit
 opencv-python-headless
 streamlit-webrtc
+streamlit-audio-recorder
 
 
 
