@@ -10,23 +10,19 @@ import streamlit.components.v1 as components
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Wambi AI", page_icon="🌞", layout="wide")
 
-# --- STYLES FOR PINK THEME ---
+# --- PINK THEME STYLING ---
 st.markdown("""
 <style>
-body {
-    background-color: #fff0f5;
-}
-h1, h2, h3 {
-    color: #ff1493;
-}
-.stButton>button {
+body { background-color: #fff0f5; }
+h1,h2,h3 { color: #ff1493; }
+button.record-btn {
     background-color: #ff69b4;
     color: white;
-    border-radius: 12px;
-    height: 45px;
-    width: 160px;
-    font-weight: bold;
     font-size: 16px;
+    font-weight: bold;
+    border-radius: 12px;
+    padding: 10px 20px;
+    margin-right: 10px;
 }
 .card {
     background-color: #ffe4f1;
@@ -45,7 +41,7 @@ st.success("“Wake up, Hard Guy. Greatness never sleeps.”")
 st.info("💬 *'Discipline is the bridge between goals and accomplishment.'*")
 st.markdown("---")
 
-# --- START MY DAY SECTION ---
+# --- START MY DAY ---
 if st.button("Start My Day", key="start_day"):
     st.success("✅ Wambi Activated")
 
@@ -55,7 +51,7 @@ if st.button("Start My Day", key="start_day"):
     tts.save("alarm.mp3")
     st.audio("alarm.mp3", format="audio/mp3")
 
-    # Simulated Vital Signs Card
+    # Simulated Vitals Card
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("🩺 Vital Sign Check (Simulated)")
     heart_rate = random.randint(65, 85)
@@ -93,78 +89,50 @@ if st.button("Start My Day", key="start_day"):
 
 st.markdown("---")
 
-# --- FULLY AUTOMATIC LIVE MIC ---
+# --- LIVE MIC RECORDING ---
 st.subheader("🎤 Speak to Wambi (Live Browser Mic)")
 
-# Embed HTML + JS component
 components.html("""
+<div>
+  <button class="record-btn" id="startBtn">Start Recording</button>
+  <button class="record-btn" id="stopBtn">Stop Recording</button>
+</div>
 <script>
-let startBtn = document.createElement("button");
-startBtn.innerHTML = "Start Recording";
-let stopBtn = document.createElement("button");
-stopBtn.innerHTML = "Stop Recording";
-document.body.appendChild(startBtn);
-document.body.appendChild(stopBtn);
-
+let startBtn = document.getElementById('startBtn');
+let stopBtn = document.getElementById('stopBtn');
 let mediaRecorder;
 let audioChunks = [];
 
 startBtn.onclick = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.start();
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
+  audioChunks = [];
+  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+  mediaRecorder.start();
 };
 
 stopBtn.onclick = async () => {
-    mediaRecorder.stop();
-    mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunks, { type: 'audio/wav' });
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => {
-            const base64data = reader.result;
-            // Send to Streamlit directly using st.session_state hack
-            fetch(window.location.href, {
-                method: "POST",
-                body: JSON.stringify({audio: base64data}),
-                headers: {"Content-Type": "application/json"}
-            });
-        };
+  mediaRecorder.stop();
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(audioChunks, { type: 'audio/wav' });
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = () => {
+      const base64data = reader.result;
+      const el = document.getElementById("st_audio");
+      el.value = base64data;
+      el.dispatchEvent(new Event('change'));
     };
+  };
 };
 </script>
-""", height=100, scrolling=False)
+<input type="hidden" id="st_audio" name="st_audio">
+""", height=120)
 
-# --- RECEIVE AUTOMATIC AUDIO IN PYTHON ---
-import json
+# --- Hidden input to receive audio from JS ---
+audio_base64 = st.text_input("Hidden Audio Input", "", key="st_audio")
 
-def handle_audio():
-    if st.experimental_get_query_params():
-        params = st.experimental_get_query_params()
-        audio_base64 = params.get("audio", [""])[0]
-        if audio_base64:
-            audio_bytes = base64.b64decode(audio_base64.split(",")[1])
-            st.audio(audio_bytes, format="audio/wav")
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-                tmp.write(audio_bytes)
-                tmp_path = tmp.name
-            recognizer = sr.Recognizer()
-            with sr.AudioFile(tmp_path) as source:
-                audio_data = recognizer.record(source)
-            try:
-                text = recognizer.recognize_google(audio_data)
-                st.success(f"🗣️ You said: **{text}**")
-            except sr.UnknownValueError:
-                st.warning("Wambi couldn't understand that, Hard Guy.")
-            except sr.RequestError:
-                st.error("Speech recognition service unavailable.")
-
-# This is a placeholder since Streamlit Cloud cannot receive POST via JS fetch.
-# In production, you would use a Streamlit component that allows two-way communication.
-# For now, the Base64 manual input remains the fallback.
-audio_base64 = st.text_input("Paste Base64 audio here after recording", "")
+# --- Auto transcription ---
 if audio_base64:
     audio_bytes = base64.b64decode(audio_base64.split(",")[1])
     st.audio(audio_bytes, format="audio/wav")
@@ -181,3 +149,41 @@ if audio_base64:
         st.warning("Wambi couldn't understand that, Hard Guy.")
     except sr.RequestError:
         st.error("Speech recognition service unavailable.")
+
+st.markdown("---")
+
+# --- VOICE COMMAND UPLOADER (backup) ---
+st.subheader("🎙️ Upload Voice Command")
+uploaded_file = st.file_uploader("Upload a .wav audio file (Max: 10MB)", type=["wav"], key="voice_upload")
+if uploaded_file:
+    st.audio(uploaded_file, format="audio/wav")
+    recognizer = sr.Recognizer()
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = tmp.name
+    with sr.AudioFile(tmp_path) as source:
+        audio_file = recognizer.record(source)
+    try:
+        text = recognizer.recognize_google(audio_file)
+        st.success(f"🗣️ You said: {text}")
+    except sr.UnknownValueError:
+        st.warning("Sorry, Wambi could not understand the audio.")
+    except sr.RequestError:
+        st.error("Speech recognition service unavailable.")
+
+st.markdown("---")
+
+# --- COMING SOON PLACEHOLDERS ---
+st.subheader("📊 Morning Vital Scan (coming soon)")
+st.write("Wambi will check your vitals using your webcam and smart sensors.")
+
+st.subheader("📸 Face Recognition (coming soon)")
+st.write("Face ID will personalize the experience for you, Hard Guy.")
+
+st.subheader("🎙️ Voice Assistant (coming soon)")
+st.write("You will soon be able to talk to Wambi using your voice.")
+
+# --- FOOTER ---
+st.markdown("---")
+st.caption(f"🕒 {datetime.now().strftime('%A, %B %d, %Y - %H:%M:%S')}")
+st.caption("Powered by Streamlit | Wambi AI (Premium Preview)")
