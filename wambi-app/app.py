@@ -6,8 +6,6 @@ import tempfile
 from datetime import datetime
 import base64
 import streamlit.components.v1 as components
-import numpy as np
-from scipy.io.wavfile import write
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Wambi AI", page_icon="🌞")
@@ -64,12 +62,12 @@ st.markdown("---")
 # --- LIVE MIC RECORDING USING CUSTOM COMPONENT ---
 st.subheader("🎤 Speak to Wambi (Live Browser Mic)")
 
-# This component sends Base64 audio directly to Python when stopped
+# Embed HTML + JS component for recording
 components.html("""
 <script>
-const startBtn = document.createElement("button");
+let startBtn = document.createElement("button");
 startBtn.innerHTML = "Start Recording";
-const stopBtn = document.createElement("button");
+let stopBtn = document.createElement("button");
 stopBtn.innerHTML = "Stop Recording";
 document.body.appendChild(startBtn);
 document.body.appendChild(stopBtn);
@@ -81,14 +79,14 @@ startBtn.onclick = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder = new MediaRecorder(stream);
     audioChunks = [];
-    mediaRecorder.ondataavailable = e => { audioChunks.push(e.data); };
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
     mediaRecorder.start();
 };
 
 stopBtn.onclick = async () => {
     mediaRecorder.stop();
-    mediaRecorder.onstop = async () => {
-        const blob = new Blob(audioChunks);
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/wav' });
         const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = () => {
@@ -103,14 +101,14 @@ stopBtn.onclick = async () => {
 <input type="hidden" id="st_audio" name="st_audio">
 """, height=100, scrolling=False)
 
-# Get the audio Base64 from the component
-audio_base64 = st.experimental_get_query_params().get("st_audio", [""])[0]
+# Get the audio Base64 from hidden input
+audio_base64 = st.text_input("Paste Base64 audio here after recording", "")
 
 if audio_base64:
     audio_bytes = base64.b64decode(audio_base64.split(",")[1])
     st.audio(audio_bytes, format="audio/wav")
 
-    # Save temp WAV and transcribe
+    # Save temp WAV file and transcribe
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         tmp.write(audio_bytes)
         tmp_path = tmp.name
@@ -144,7 +142,7 @@ if uploaded_file:
         audio_file = recognizer.record(source)
     try:
         text = recognizer.recognize_google(audio_file)
-        st.success(f"You said: {text}")
+        st.success(f"🗣️ You said: {text}")
     except sr.UnknownValueError:
         st.warning("Sorry, Wambi could not understand the audio.")
     except sr.RequestError:
