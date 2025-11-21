@@ -4,7 +4,11 @@ import random
 import speech_recognition as sr
 import tempfile
 from datetime import datetime
-from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, WebRtcMode
+from streamlit_audio_recorder import audio_recorder
+import base64
+import io
+import numpy as np
+from scipy.io.wavfile import write
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Wambi AI", page_icon="🌞")
@@ -12,7 +16,7 @@ st.set_page_config(page_title="Wambi AI", page_icon="🌞")
 # --- HEADER ---
 st.title("🌞 Good Morning, Hard Guy")
 st.markdown("### Wambi, remember the words of your Father")
-st.success("“Wake up, Wambi. Greatness never sleeps.”")
+st.success("“Wake up, Hard Guy. Greatness never sleeps.”")
 st.info("💬 *'Discipline is the bridge between goals and accomplishment.'*")
 st.markdown("---")
 
@@ -46,13 +50,4 @@ if st.button("Start My Day", key="start_day"):
         "20-minute morning walk",
         "15-minute yoga stretch",
         "10 push-ups, 20 squats",
-        "High-Intensity 5-minute HIIT"
-    ])
-    st.write(f"Today’s suggestion: **{tip}**")
-
-    # -- Farewell Audio --
-    farewell = "All set, Wambi. Crush the day."
-    tts = gTTS(farewell)
-    tts.save("farewell.mp3")
-    st.audio("farewell.mp3", format="audio/mp3")
-    
+        "High
