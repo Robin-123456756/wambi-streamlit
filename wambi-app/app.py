@@ -12,7 +12,7 @@ st.set_page_config(page_title="Wambi AI", page_icon="🌞")
 # --- HEADER ---
 st.title("🌞 Good Morning, Hard Guy")
 st.markdown("### Wambi, remember the words of your Father")
-st.success("“Wake up, Hard Guy. Greatness never sleeps.”")
+st.success("“Wake up, Wambi. Greatness never sleeps.”")
 st.info("💬 *'Discipline is the bridge between goals and accomplishment.'*")
 st.markdown("---")
 
