@@ -51,3 +51,4 @@ if st.button("Start My Day", key="start_day"):
         "15-minute yoga stretch",
         "10 push-ups, 20 squats",
         "High"
+    ])
