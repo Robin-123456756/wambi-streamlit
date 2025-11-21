@@ -51,7 +51,7 @@ if st.button("Start My Day", key="start_day"):
     st.write(f"Today’s suggestion: **{tip}**")
 
     # -- Farewell Audio --
-    farewell = "All set, Hard Guy. Crush the day."
+    farewell = "All set, Wambi. Crush the day."
     tts = gTTS(farewell)
     tts.save("farewell.mp3")
     st.audio("farewell.mp3", format="audio/mp3")
