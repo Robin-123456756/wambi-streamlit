@@ -93,9 +93,10 @@ if st.button("Start My Day", key="start_day"):
 
 st.markdown("---")
 
-# --- LIVE MIC RECORDING ---
+# --- FULLY AUTOMATIC LIVE MIC ---
 st.subheader("🎤 Speak to Wambi (Live Browser Mic)")
 
+# Embed HTML + JS component
 components.html("""
 <script>
 let startBtn = document.createElement("button");
@@ -124,30 +125,55 @@ stopBtn.onclick = async () => {
         reader.readAsDataURL(blob);
         reader.onloadend = () => {
             const base64data = reader.result;
-            const el = document.getElementById("st_audio");
-            el.value = base64data;
-            el.dispatchEvent(new Event('change'));
+            // Send to Streamlit directly using st.session_state hack
+            fetch(window.location.href, {
+                method: "POST",
+                body: JSON.stringify({audio: base64data}),
+                headers: {"Content-Type": "application/json"}
+            });
         };
     };
 };
 </script>
-<input type="hidden" id="st_audio" name="st_audio">
 """, height=100, scrolling=False)
 
-audio_base64 = st.text_input("Paste Base64 audio here after recording", "")
+# --- RECEIVE AUTOMATIC AUDIO IN PYTHON ---
+import json
 
+def handle_audio():
+    if st.experimental_get_query_params():
+        params = st.experimental_get_query_params()
+        audio_base64 = params.get("audio", [""])[0]
+        if audio_base64:
+            audio_bytes = base64.b64decode(audio_base64.split(",")[1])
+            st.audio(audio_bytes, format="audio/wav")
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+                tmp.write(audio_bytes)
+                tmp_path = tmp.name
+            recognizer = sr.Recognizer()
+            with sr.AudioFile(tmp_path) as source:
+                audio_data = recognizer.record(source)
+            try:
+                text = recognizer.recognize_google(audio_data)
+                st.success(f"🗣️ You said: **{text}**")
+            except sr.UnknownValueError:
+                st.warning("Wambi couldn't understand that, Hard Guy.")
+            except sr.RequestError:
+                st.error("Speech recognition service unavailable.")
+
+# This is a placeholder since Streamlit Cloud cannot receive POST via JS fetch.
+# In production, you would use a Streamlit component that allows two-way communication.
+# For now, the Base64 manual input remains the fallback.
+audio_base64 = st.text_input("Paste Base64 audio here after recording", "")
 if audio_base64:
     audio_bytes = base64.b64decode(audio_base64.split(",")[1])
     st.audio(audio_bytes, format="audio/wav")
-
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
         tmp.write(audio_bytes)
         tmp_path = tmp.name
-
     recognizer = sr.Recognizer()
     with sr.AudioFile(tmp_path) as source:
         audio_data = recognizer.record(source)
-
     try:
         text = recognizer.recognize_google(audio_data)
         st.success(f"🗣️ You said: **{text}**")
@@ -155,41 +181,3 @@ if audio_base64:
         st.warning("Wambi couldn't understand that, Hard Guy.")
     except sr.RequestError:
         st.error("Speech recognition service unavailable.")
-
-st.markdown("---")
-
-# --- VOICE COMMAND UPLOADER ---
-st.subheader("🎙️ Upload Voice Command")
-uploaded_file = st.file_uploader("Upload a .wav audio file (Max: 10MB)", type=["wav"], key="voice_upload")
-if uploaded_file:
-    st.audio(uploaded_file, format="audio/wav")
-    recognizer = sr.Recognizer()
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(uploaded_file.read())
-        tmp_path = tmp.name
-    with sr.AudioFile(tmp_path) as source:
-        audio_file = recognizer.record(source)
-    try:
-        text = recognizer.recognize_google(audio_file)
-        st.success(f"🗣️ You said: {text}")
-    except sr.UnknownValueError:
-        st.warning("Sorry, Wambi could not understand the audio.")
-    except sr.RequestError:
-        st.error("Speech recognition service unavailable.")
-
-st.markdown("---")
-
-# --- COMING SOON PLACEHOLDERS ---
-st.subheader("📊 Morning Vital Scan (coming soon)")
-st.write("Wambi will check your vitals using your webcam and smart sensors.")
-
-st.subheader("📸 Face Recognition (coming soon)")
-st.write("Face ID will personalize the experience for you, Hard Guy.")
-
-st.subheader("🎙️ Voice Assistant (coming soon)")
-st.write("You will soon be able to talk to Wambi using your voice.")
-
-# --- FOOTER ---
-st.markdown("---")
-st.caption(f"🕒 {datetime.now().strftime('%A, %B %d, %Y - %H:%M:%S')}")
-st.caption("Powered by Streamlit | Wambi AI (Premium Preview)")
