@@ -4,6 +4,7 @@ import random
 import speech_recognition as sr
 import tempfile
 from datetime import datetime
+from audiorecorder import audiorecorder
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(page_title="Wambi AI", page_icon="🌞")
@@ -50,19 +51,49 @@ if st.button("Start My Day", key="start_day"):
     st.write(f"Today’s suggestion: **{tip}**")
 
     # -- Farewell Audio --
-    farewell = f"All set, Hard Guy. Crush the day."
+    farewell = "All set, Hard Guy. Crush the day."
     tts = gTTS(farewell)
     tts.save("farewell.mp3")
     st.audio("farewell.mp3", format="audio/mp3")
 
 st.markdown("---")
 
+
+# --- REAL-TIME VOICE RECORDING SECTION ---
+st.subheader("🎤 Speak to Wambi (Real-time Microphone Recording)")
+
+audio = audiorecorder("🎙️ Start Recording", "🛑 Stop Recording")
+
+if len(audio) > 0:
+    st.audio(audio.tobytes(), format="audio/wav")
+
+    # Save temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+        tmp.write(audio.tobytes())
+        tmp_path = tmp.name
+
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(tmp_path) as source:
+        audio_data = recognizer.record(source)
+
+    try:
+        text = recognizer.recognize_google(audio_data)
+        st.success(f"🗣️ You said: **{text}**")
+    except sr.UnknownValueError:
+        st.warning("Wambi couldn't understand that, Hard Guy.")
+    except sr.RequestError:
+        st.error("Speech recognition service unavailable.")
+
+
+st.markdown("---")
+
+
 # --- VOICE COMMAND UPLOADER WITH SIZE LIMIT ---
 st.subheader("🎙️ Upload Voice Command")
 uploaded_file = st.file_uploader("Upload a .wav audio file (Max: 10MB)", type=["wav"], key="voice_upload")
 
 if uploaded_file is not None:
-    if uploaded_file.size > 10 * 1024 * 1024:  # 10MB in bytes
+    if uploaded_file.size > 10 * 1024 * 1024:
         st.error("❌ File too large. Please upload a .wav file smaller than 10MB.")
     else:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
